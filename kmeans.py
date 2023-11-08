@@ -10,14 +10,14 @@ exit = False # Game loop exit condition
 
 # Node class for graph
 class Point:
-    def __init__(self, point, radius, color):
+    def __init__(self, point, radius, color, neighborList = []):
         # Visual properties
         self.origin = point # Center as vector
         self.radius = radius
         self.diameter = self.radius*2
         self.c = color
         # Data properties
-        self.neighbors = []
+        self.neighbors = neighborList
         self.value = None
 
     def addNeighbor(self, neighborInput):
@@ -31,22 +31,48 @@ class Point:
             self.neighbors.remove(neighborInput)
 
     def draw(self, canvas):
-        pygame.draw.circle(screen, "black", self.origin, self.radius)
+        pygame.draw.circle(canvas, self.c, self.origin, self.radius)
 
 
 # GAME OBJECTS
 dataCount = 20
 dataList = []
-clusterCount = 2
+clusterCount = 3
+clusterList = []
 
-for n in dataCount:
+# QUADRANT CREATION
+# This system will define a cluster's positioning by creating a circular area in which data can appear. The more clusters, the less there are. Also ensures two clusters do not overlap.
+for i in range(clusterCount):
+    clusterOrigin = (random.randint(0, screen.screenWidth),random.randint(0, screen.screenHeight)) # Computes a random point to serve as the cluster's center. All points will be within a radius of this point
+    radius = 20
+    clusterList.append(clusterOrigin)
+
+    
+
+
+# clusterList.append((0, int(screen.screenHeight/clusterCount)))
+# clusterList.append((int(screen.screenHeight/clusterCount), screen.screenHeight))
+
+for n in range(dataCount):
     # Choose a random cluster to plot points
-    cluster = random.randint%clusterCount
-    randCoordinate = pygame.Vector2(random.randint%cluster, random.randint%cluster)
-    dataList.append(Point())
+    cluster = random.randint(0, clusterCount-1)
+    randx = random.randint()
+    randy = int(random.randint(clusterList[cluster][0], clusterList[cluster][1]))
+    randCoordinate = pygame.Vector2(randx, randy)
+    # Color black
+    color = "black"
+
+    # Color by cluster at creation
+    # if(cluster == 0):
+    #     color = "dark blue"
+    # else:
+    #     color = "dark red"
+    rad = 4
+    # This line appends the coordinate, radius, color, AND assigns each point to be neighbors with all others
+    dataList.append(Point(randCoordinate, rad, color, dataList))
 
 for point in dataList:
-    screen.addDraw(point)
+    screen.addDraw(point, 1)
 
 # GAME LOOP
 while not exit: 
@@ -59,10 +85,6 @@ while not exit:
                 exit = True
             if event.key == pygame.K_g:
                 screen.toggleGrid()
-            if event.key == pygame.K_f:
-                screen.toggleFPS()
-
-    
     screen.draw()
 
 # QUIT

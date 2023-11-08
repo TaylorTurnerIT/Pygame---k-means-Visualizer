@@ -5,7 +5,6 @@ from math import floor
 pygame.init()
 
 # VIEW OBJECT
-# TODO: Create an object to store draw methods w/ preferred layer
 
 # This system is a layer based approach, with only one draw per layer. Perhaps in the future I can investigate parallel programming which seems like the best approach to drawing two things on the same layer
 class Screen:
@@ -79,8 +78,9 @@ class Screen:
     # Draws the fps counter
     def drawFps(self):
         if(self.fpsStatus):
-            self.fps = pygame.font.SysFont("Arial", self.fpsSize).render(str(int(pygame.time.get_ticks()/1000)), True, "yellow")
+            self.fps = pygame.font.SysFont("Arial", self.fpsSize).render(str(int(pygame.time.get_ticks()/1000)), True, "dark green")
             self.canvas.blit(self.fps, (self.screenWidth-self.fpsSize, 0))
+    
 
     # Stores the object and their layer
     class Node:
