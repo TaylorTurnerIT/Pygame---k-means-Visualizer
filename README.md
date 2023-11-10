@@ -1,5 +1,3 @@
-### k-means-Visualizer
-
 ## Overview
 The k-Means Visualizer is a Python program that visually demonstrates the k-means clustering algorithm using Pygame and NumPy. It creates a graphical representation of data points and clusters, offering a clear and intuitive understanding of how k-means clustering works.
 
