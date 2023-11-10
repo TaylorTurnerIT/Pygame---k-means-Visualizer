@@ -1,1 +1,4 @@
 __pycache__/screen.cpython-312.pyc
+dist/*
+build/*
+*.spec
