@@ -42,6 +42,8 @@ class Screen:
         self.drawMethods = self.sort(self.drawMethods) 
     
     def removeDraw(self, removalObj):
+        # This for uses basic linear search to check each node in the draw loop to find the target node containing the object. If it finds it, it removes it from the list.
+        # TODO: Optimize this using AT LEAST binary search, and check if an array is the best data structure for this at scale
         for node in self.drawMethods:
             if node.obj == removalObj:
                 self.drawMethods.remove(node)
