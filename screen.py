@@ -1,5 +1,4 @@
 import pygame
-import logging
 from math import floor
 
 pygame.init()
@@ -10,11 +9,11 @@ pygame.init()
 class Screen:
     # Input of to caption text, horizontal width, vertical height
     defaultCaption = "Default Program"
-    defaultScreenWidth = floor(pygame.display.Info().current_w/2)
-    defaultScreenHeight = floor(pygame.display.Info().current_h/2)
+    defaultScreenWidth = floor(pygame.display.Info().current_w*0.75)
+    defaultScreenHeight = floor(pygame.display.Info().current_h*0.75)
     defaultGridStatus = True
     defaultGridSize = 20 # px
-    defaultFpsStatus = True
+    defaultFpsStatus = False
     defaultFpsSize = 12 # px
 
     def __init__(self, captionInput = defaultCaption, screenWidthInput = defaultScreenWidth, screenHeightInput = defaultScreenHeight):
@@ -50,15 +49,16 @@ class Screen:
     # Sorts the draw array by layer
     def sort(self, unsortedArray):
         array = unsortedArray
-        i = 1
-        while (i < len(array)):
-            j = i
-            while (j > 0 and array[j-1] > array[j]):
-                dummy = array[j]
-                array[j] = array[j-1]
-                array[j-1] = dummy
-                j -= 1
-            i += 1
+        if(array[len(array)-1] > array[len(array)-2]):
+            i = 1
+            while (i < len(array)):
+                j = i
+                while (j > 0 and array[j-1] > array[j]):
+                    dummy = array[j]
+                    array[j] = array[j-1]
+                    array[j-1] = dummy
+                    j -= 1
+                i += 1
         return array
     
     # Optional toggles

@@ -1,6 +1,7 @@
 import pygame
 import numpy as np
 import random
+import time
 from screen import *
 
 # INIT
@@ -37,13 +38,13 @@ class Point:
 class DataCreator:
     def __init__(self):
         # GAME OBJECTS
-        self.dataCount = 250 # number of data points to generate
+        self.dataCount = 5000 # number of data points to generate
         self.dataList = [] # array to store all data points
         self.clusterCount = 3 # number of clusters to generate, also used to determine number of clusters for a k-means alg.
         self.clusterList = [] # Stores the cluster 
-        self.genRadius = 50 # Radius of the generation circle
+        self.genRadius = 150 # Radius of the generation circle
         self.pointDrawRadius = 3 # Size of each data point (visual only)
-        self.pointColor = "black"
+        self.pointColor = "black" # Defaults color to black
         self.generateClusters() # When the object is created, generate the clusters, then the data
         self.generateData()
 
@@ -55,28 +56,34 @@ class DataCreator:
         for i in range(self.clusterCount):
             self.clusterOrigin = pygame.Vector2(int(random.randint(self.genRadius, screen.screenWidth-self.genRadius)),int(random.randint(self.genRadius, screen.screenHeight-self.genRadius))) # Computes a random point to serve as the cluster's center. All points will be within a radius of this point
             self.clusterList.append(self.clusterOrigin)
-            print("Cluster origin is at ")
-            print(self.clusterOrigin)
+            # print("Cluster origin is at ")
+            # print(self.clusterOrigin)
 
     # Generates the data within the clusters, the clusters MUST be generated before this can work.
     def generateData(self):
+        startTime = time.time()
+        
         for n in range(self.dataCount):
-            cluster = random.randint(0, self.clusterCount-1) # Between 1 and cluster count, but zero indexed
+            cluster = n%self.clusterCount
+            # cluster = random.randint(0, self.clusterCount-1) # Between 1 and cluster count, but zero indexed
             origin = self.clusterList[cluster] # Gets current cluster
-            randCoordinate = pygame.Vector2(0,0) # Defaults to 0,0
-            
             angle = random.uniform(0,1) * 2 * np.pi # Gets a random angle direction in a circular area
+            # angle = random.random()%1 * 2 * np.pi
             radius = self.genRadius * np.sqrt(random.uniform(0,1)) # Gets a random distance from the origin to generates
             # Generates cartesian coordinates from angle and radius
-            randx = radius * np.cos(angle)+self.clusterOrigin.x
-            randy = radius * np.sin(angle)+self.clusterOrigin.y
+            randx = radius * np.cos(angle)+origin.x # origin offsets the generation origin
+            randy = radius * np.sin(angle)+origin.y
             randCoordinate = pygame.Vector2(randx, randy)
             # This line appends the coordinate, radius, color, AND assigns each point to be neighbors with all others
             newPoint = Point(randCoordinate, self.pointDrawRadius, self.pointColor, self.dataList)
-            screen.addDraw(newPoint, 1)
+            screen.addDraw(newPoint, cluster) # Draws each cluster on its own layer (this is not how it should work, only done this way for debugging)
             self.dataList.append(newPoint)
+            # print(n)
 
-
+        # DEBUG PERFORMANCE
+        endTime = time.time()
+        print("Generation Time: ")
+        print(endTime-startTime)
 
 Data = DataCreator()
 
