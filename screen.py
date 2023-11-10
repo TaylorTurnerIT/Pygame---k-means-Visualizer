@@ -40,6 +40,12 @@ class Screen:
         self.drawMethods.append(self.newNode)
         # TODO: Measure performance impact of sorting every time a new draw is added
         self.drawMethods = self.sort(self.drawMethods) 
+    
+    def removeDraw(self, removalObj):
+        for node in self.drawMethods:
+            if node.obj == removalObj:
+                self.drawMethods.remove(node)
+
 
     # Externally accessible caption update
     def updateCaption(self, newCaption):
@@ -49,7 +55,7 @@ class Screen:
     # Sorts the draw array by layer
     def sort(self, unsortedArray):
         array = unsortedArray
-        if(array[len(array)-1] > array[len(array)-2]):
+        if(array[len(array)-1] > array[len(array)-2]): # Checks if the array is sorted by comparing the last element with the second-last element. Imperfect but generally functional.
             i = 1
             while (i < len(array)):
                 j = i
