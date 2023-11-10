@@ -51,8 +51,6 @@ class DataCreator:
         self.drawLayer = 1
         self.generateClusters() # When the object is created, generate the clusters, then the data
         self.generateData()
-        
-
     def __del__(self):
         for d in range(len(self.dataList)):
             screen.removeDraw(self.dataList[d])
