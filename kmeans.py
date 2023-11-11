@@ -35,10 +35,10 @@ class Point:
         pygame.draw.circle(canvas, self.c, self.origin, self.radius)
 
 
-class DataCreator:
+class DataController:
     def __init__(self):
         # GAME OBJECTS
-        self.dataCount = 250 # number of data points to generate
+        self.dataCount = 5000 # number of data points to generate (will make more than this if anomalies are enabled)
         self.dataList = [] # array to store all data points
         self.generateAnomalies = True # generate data outside normal area
         self.anomalyRatio = 0.3 # Default 10% of datacount will be anomalous
@@ -51,6 +51,7 @@ class DataCreator:
         self.drawLayer = 1
         self.generateClusters() # When the object is created, generate the clusters, then the data
         self.generateData()
+        self.kMeansManager = self.kMeans() # initializes the k-means algorithm
     def __del__(self):
         for d in range(len(self.dataList)):
             screen.removeDraw(self.dataList[d])
@@ -59,7 +60,6 @@ class DataCreator:
 
     # CLUSTER CREATION
         # This system will define a cluster's positioning by creating a circular area in which data can appear. The more clusters, the less data is in each.
-
     # Generates the clusters and adds them to the list
     def generateClusters(self):
         for i in range(self.clusterCount):
@@ -102,14 +102,32 @@ class DataCreator:
                 newPoint = Point(randCoordinate, self.pointDrawRadius, self.pointColor, self.dataList)
                 screen.addDraw(newPoint, self.drawLayer)
                 self.dataList.append(newPoint)
-
-        # DEBUG PERFORMANCE
+                # DEBUG PERFORMANCE
         endTime = time.time()
         print("Data Generated")
         print("\tGeneration Time: ")
         print(endTime-startTime)
+    class kMeans:
+        def __init__(self):
+            # Use Forgy method- Choose a random point in the data
+            self.kList = []
+            for c in range(self.clusterCount):
+                kpos = random.randint(0,len(self.dataList)) # Assign a random data point as the centroid for current cluster
+                randColor = random.randint(0,255)
+                kcol = (randColor,randColor,randColor) # Random color for each cluster. This will serve as the 
+                k = Point(kpos,5,kcol) # Creates a point for the each k-cluster. The neighbors array built in will serve as the closests data to the cluster.
+                self.kList.append(k) # Assigns the cluster to a list of clusters
+                screen.addDraw(k, self.drawLayer+1)
+        
+        def assignStep(self):
 
-Data = DataCreator()
+            self.updateStep()
+        
+        def updateStep(self):
+            self.assignStep()
+
+
+Controller = DataController()
 
 # GAME LOOP
 while not exit: 
@@ -123,10 +141,33 @@ while not exit:
             if event.key == pygame.K_g:
                 screen.toggleGrid()
             if event.key == pygame.K_1:
-                if(Data): # checks if Data exists
-                    del Data # Clear previous dataset
-                    Data=DataCreator() # Regenerate data
+                if(Controller): # checks if Data exists
+                    del Controller # Clear previous dataset
+                    Conrtoller = DataController() # Regenerate data
+    
     screen.draw()
 
 # QUIT
 pygame.quit()
+
+
+"""
+k-means Algorithm:
+    Initialization:
+    1. Choose a random data point for each cluster starting position (Forgy method)
+    2. Generate a new point to represent the cluster centroid
+    3. Assign each cluster a unique color
+    4. Move to assignment step
+    
+    (Loop the following:)
+    Assignment:
+    1. For each point in data points, find the squared distance to each cluster.
+    2. Whichever cluster is closests, assign that data to that cluster
+    3. Color the data based on the current cluster (to visualize the specific data point's current cluster)
+    4. Move to update step
+
+    Update:
+    1. Take the average of all vectors in a cluster, reassign the centroid to that point
+    2. Move to assigment step
+
+"""
