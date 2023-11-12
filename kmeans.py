@@ -11,7 +11,7 @@ exit = False # Game loop exit condition
 
 # Node class for graph
 class Point:
-    def __init__(self, point, radius, color, neighborList = []):
+    def __init__(self, point: pygame.Vector2, radius, color, neighborList = [], value = []):
         # Visual properties
         self.origin = point # Center as vector
         self.radius = radius
@@ -19,7 +19,7 @@ class Point:
         self.c = color
         # Data properties
         self.neighbors = neighborList
-        self.value = None
+        self.value = value
 
     def addNeighbor(self, neighborInput):
         # Check if it exists already, else append
@@ -33,7 +33,6 @@ class Point:
 
     def draw(self, canvas):
         pygame.draw.circle(canvas, self.c, self.origin, self.radius)
-
 
 class DataController:
     def __init__(self):
@@ -49,14 +48,19 @@ class DataController:
         self.pointDrawRadius = 3 # Size of each data point (visual only)
         self.pointColor = "black" # Defaults color to black
         self.drawLayer = 1
-        self.generateClusters() # When the object is created, generate the clusters, then the data
         self.generateData()
-        self.kMeansManager = self.kMeans() # initializes the k-means algorithm
+        self.kMeansManager = self.kMeans(self.dataList, self.clusterCount, self.drawLayer) # initializes the k-means algorithm
+    
     def __del__(self):
+        self.clearDrawData()
+
+    def generateData(self):
+        self.clearDrawData()
+        self.generateData()
+
+    def clearDrawData(self):
         for d in range(len(self.dataList)):
             screen.removeDraw(self.dataList[d])
-        print("Data Deleted")
-
 
     # CLUSTER CREATION
         # This system will define a cluster's positioning by creating a circular area in which data can appear. The more clusters, the less data is in each.
@@ -108,24 +112,52 @@ class DataController:
         print("\tGeneration Time: ")
         print(endTime-startTime)
     class kMeans:
-        def __init__(self):
+        """
+        Initialization:
+            1. Choose a random data point for each cluster starting position (Forgy method)
+            2. Generate a new point to represent the cluster centroid
+            3. Assign each cluster a unique color
+            4. Move to assignment step
+        """
+        def __init__(self, generatedData: Point, clusterCount, drawLayer):
             # Use Forgy method- Choose a random point in the data
-            self.kList = []
-            for c in range(self.clusterCount):
+            self.dataList = generatedData
+            self.kList :Point # list of points for each k-cluster centroid
+            self.step = 0 # Shows how many steps have been called for the kmeans
+            for c in range(clusterCount):
                 kpos = random.randint(0,len(self.dataList)) # Assign a random data point as the centroid for current cluster
                 randColor = random.randint(0,255)
-                kcol = (randColor,randColor,randColor) # Random color for each cluster. This will serve as the 
-                k = Point(kpos,5,kcol) # Creates a point for the each k-cluster. The neighbors array built in will serve as the closests data to the cluster.
+                kcolor = (randColor,randColor,randColor) # Random color for each cluster. This will serve as the 
+                k = Point(kpos, 5, kcolor) # Creates a point for the each k-cluster. The neighbors array built in will serve as the closests data to the cluster.
+                k.value = []
+                for x in range(clusterCount):
+                    k.value.append(k.origin.distance_squared_to())
                 self.kList.append(k) # Assigns the cluster to a list of clusters
-                screen.addDraw(k, self.drawLayer+1)
-        
+                screen.addDraw(k, drawLayer+1)
+        """
+        Assignment:
+            1. For each point in data points, find the squared distance to each cluster.
+            2. Whichever cluster is closests, assign that data to that cluster
+            3. Color the data based on the current cluster (to visualize the specific data point's current cluster)
+            4. Move to update step
+        """
         def assignStep(self):
-
-            self.updateStep()
+            self.centerStep()
         
-        def updateStep(self):
+        """
+        Center:
+            1. Take the average of all vectors in a cluster, reassign the centroid to that point
+            2. Move to assigment step
+        """
+        def centerStep(self):
             self.assignStep()
 
+        def update(self):
+            if (self.step % 2 == 0): 
+                self.assignStep()
+            else:
+                self.centerStep()
+            self.step = self.step+1
 
 Controller = DataController()
 
@@ -141,33 +173,14 @@ while not exit:
             if event.key == pygame.K_g:
                 screen.toggleGrid()
             if event.key == pygame.K_1:
-                if(Controller): # checks if Data exists
+                if(Controller): # checks if Controller exists
                     del Controller # Clear previous dataset
-                    Conrtoller = DataController() # Regenerate data
+                    Controller = DataController() # Regenerate data
+            if event.key == pygame.K_2:
+                if(Controller): # checks if Controller exists
+                    Controller.kMeansManager.update()
     
     screen.draw()
 
 # QUIT
 pygame.quit()
-
-
-"""
-k-means Algorithm:
-    Initialization:
-    1. Choose a random data point for each cluster starting position (Forgy method)
-    2. Generate a new point to represent the cluster centroid
-    3. Assign each cluster a unique color
-    4. Move to assignment step
-    
-    (Loop the following:)
-    Assignment:
-    1. For each point in data points, find the squared distance to each cluster.
-    2. Whichever cluster is closests, assign that data to that cluster
-    3. Color the data based on the current cluster (to visualize the specific data point's current cluster)
-    4. Move to update step
-
-    Update:
-    1. Take the average of all vectors in a cluster, reassign the centroid to that point
-    2. Move to assigment step
-
-"""
